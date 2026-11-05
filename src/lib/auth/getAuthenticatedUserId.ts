@@ -34,3 +34,18 @@ export async function getAuthenticatedUserId() {
 
   return payload.user_id;
 }
+
+export async function getUserId() {
+  const cookieStore = await cookies();
+
+  let accessToken = cookieStore.get("access_token")?.value;
+
+  let payload = await verifyAccessToken(accessToken);
+
+  if (!payload) {
+    console.log("error");
+    return null;
+  }
+
+  return payload.user_id;
+}

@@ -147,7 +147,7 @@ export const config = {
     "/history/:path*",
     "/bookmarks/:path*",
     "/knowva/:path*",
-    "/knowva/:path*",
+    "/notifications/:path*",
     "/signup/:path*",
   ],
 };
