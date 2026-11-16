@@ -28,7 +28,7 @@ function ThemeToggleContent() {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition hover:bg-accent hover:text-primary active:scale-95"
+        className="hidden sm:flex h-9 w-9  items-center justify-center rounded-xl text-muted-foreground transition hover:bg-accent hover:text-primary active:scale-95"
         title="Theme"
         aria-label="Toggle theme"
       >
