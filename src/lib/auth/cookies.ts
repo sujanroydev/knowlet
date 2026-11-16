@@ -15,8 +15,7 @@ export function setAuthCookies(
     sameSite: "lax",
     secure,
     path: "/",
-    // maxAge: 60 * 15,
-    maxAge: 15,
+    maxAge: 60 * 15,
   });
 
   cookies.set("refresh_token", refreshToken, {

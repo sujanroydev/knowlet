@@ -2,7 +2,6 @@ import { NextResponse, NextRequest } from "next/server";
 import { UserRole } from "@/types/user";
 import { verifyAccessToken } from "./tokens";
 import { getActiveUserRole } from "@/db/user";
-import { clearAuthCookies } from "./cookies";
 
 export async function authGate(req: NextRequest, role?: UserRole) {
   const accessToken = req.cookies.get("access_token")?.value;
@@ -14,7 +13,7 @@ export async function authGate(req: NextRequest, role?: UserRole) {
       { status: 401 },
     );
 
-    clearAuthCookies(res.cookies);
+    res.cookies.delete("access_token");
 
     return { ok: false, res };
   }
