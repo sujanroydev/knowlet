@@ -49,7 +49,7 @@ export default function SigninForm({ error }: { error?: string }) {
       }
 
       setUser(user);
-      subscribe().catch();
+      subscribe().catch(() => {});
       localStorage.setItem("knowlet-user", JSON.stringify(user));
       toast.success("Successfully Signed In");
       window.location.href = "/profile";

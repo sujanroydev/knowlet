@@ -80,7 +80,7 @@ export default function SignupForm() {
       }
 
       setUser(user);
-      subscribe();
+      subscribe().catch(() => {});
       localStorage.setItem("knowlet-user", JSON.stringify(user));
       toast.success("Successfully Signed Up", {
         description: `Your username: ${user.username}`,

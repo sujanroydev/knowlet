@@ -13,15 +13,19 @@ import { getAuthenticatedUserId } from "@/lib/auth/getAuthenticatedUserId";
 import { User } from "@/types/user";
 
 export async function getCurrentUser() {
-  const userId = await getAuthenticatedUserId();
+  try {
+    const userId = await getAuthenticatedUserId();
 
-  const user = await getUserById(userId);
+    const user = await getUserById(userId);
 
-  void updateUserLastAccessedAt(userId).catch((error) => {
-    console.error("Failed to update last accessed time", error);
-  });
+    void updateUserLastAccessedAt(userId).catch((error) => {
+      console.error("Failed to update last accessed time", error);
+    });
 
-  return user as User;
+    return user as User;
+  } catch {
+    return null;
+  }
 }
 
 export async function getUserPassword() {
