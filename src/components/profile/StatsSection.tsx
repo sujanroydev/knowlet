@@ -1,16 +1,9 @@
-import { cookies } from "next/headers";
+import { getAuthenticatedUserId } from "@/lib/auth/getAuthenticatedUserId";
 import LevelBlock from "./Stats/Level";
 import StreakBlock from "./Stats/Streak";
-import { verifyJwt } from "@/lib/auth";
 
 export default async function StatsSection() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
-
-  const { ok, payload } = await verifyJwt(token);
-  if (!ok) return;
-
-  const userId = payload.user_id;
+  const userId = await getAuthenticatedUserId();
 
   return (
     <div className="bg-card p-5 rounded-xl shadow-md space-y-6">

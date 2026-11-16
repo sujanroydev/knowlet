@@ -1,8 +1,15 @@
 import bcrypt from "bcryptjs";
-import { SignJWT } from "jose";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getPasswordHashByEmail, getUserByEmail } from "@/db/user";
+import {
+  createAccessToken,
+  createRefreshToken,
+  hashRefreshToken,
+} from "@/lib/auth/tokens";
+import { createAuthSession } from "@/db/auth/authSessions";
+import { setAuthCookies } from "@/lib/auth/cookies";
+import { getClientInfo } from "@/lib/auth/client-info";
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,21 +48,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const jwtToken = await new SignJWT({ user_id: user.id })
-      .setProtectedHeader({ alg: "HS256" })
-      .setIssuedAt()
-      .setExpirationTime("30d")
-      .sign(secret);
+    const refreshToken = createRefreshToken();
+    const refreshTokenHash = hashRefreshToken(refreshToken);
+
+    const { userAgent, ipAddress } = getClientInfo(req);
+
+    const sessionId = await createAuthSession({
+      userId: user.id,
+      refreshTokenHash,
+      userAgent,
+      ipAddress,
+    });
+
+    const accessToken = await createAccessToken({
+      userId: user.id,
+      sessionId,
+      role: user.role,
+    });
 
     const response = NextResponse.json({ user }, { status: 200 });
-    response.cookies.set("token", jwtToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 15,
-    });
+
+    setAuthCookies(response.cookies, accessToken, refreshToken);
 
     return response;
   } catch (error) {

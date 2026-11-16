@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyAdmin, verifyJwt } from "./lib/auth";
 import { PROTECTED_ROUTES } from "./config/app";
+import { clearAuthCookies } from "./lib/auth/cookies";
+import { verifyAccessToken } from "./lib/auth/tokens";
+import { refreshAccessToken } from "./lib/auth/refreshAccessToken";
 
 function slugify(value: string) {
   return value.replace(/_/g, "-");
@@ -9,18 +11,66 @@ function slugify(value: string) {
 function redirectToSignin(req: NextRequest) {
   const res = NextResponse.redirect(new URL("/signin", req.url));
 
-  res.cookies.set("token", "", {
-    httpOnly: true,
-    path: "/",
-    maxAge: 0,
-  });
+  clearAuthCookies(res.cookies);
 
   return res;
 }
 
+async function authenticate(req: NextRequest) {
+  const accessToken = req.cookies.get("access_token")?.value;
+
+  const payload = await verifyAccessToken(accessToken);
+
+  if (payload) {
+    return {
+      payload,
+      response: NextResponse.next(),
+    };
+  }
+
+  const refreshToken = req.cookies.get("refresh_token")?.value;
+
+  if (!refreshToken) {
+    return {
+      payload: null,
+      response: redirectToSignin(req),
+    };
+  }
+
+  const response = NextResponse.next();
+
+  const refreshed = await refreshAccessToken(refreshToken, response.cookies);
+
+  if (!refreshed) {
+    clearAuthCookies(response.cookies);
+
+    return {
+      payload: null,
+      response: NextResponse.redirect(new URL("/signin", req.url)),
+    };
+  }
+
+  const newAccessToken = response.cookies.get("access_token")?.value;
+
+  const newPayload = await verifyAccessToken(newAccessToken);
+
+  if (!newPayload) {
+    clearAuthCookies(response.cookies);
+
+    return {
+      payload: null,
+      response: NextResponse.redirect(new URL("/signin", req.url)),
+    };
+  }
+
+  return {
+    payload: newPayload,
+    response,
+  };
+}
+
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const token = req.cookies.get("token")?.value;
 
   // OLD NOTES REDIRECTS
   if (pathname === "/notes") {
@@ -48,22 +98,20 @@ export async function proxy(req: NextRequest) {
 
   // AUTH
   if (PROTECTED_ROUTES.some((route) => pathname.startsWith(route))) {
-    const { ok } = await verifyJwt(token);
+    const { response } = await authenticate(req);
 
-    if (!ok) return redirectToSignin(req);
+    return response;
   }
 
   // ADMIN
   if (pathname.startsWith("/dashboard")) {
-    const { ok, reason } = await verifyAdmin(token);
+    const { payload, response } = await authenticate(req);
 
-    if (!ok) {
-      if (reason === "NOT_ADMIN") {
-        return NextResponse.redirect(new URL("/forbidden", req.url));
-      } else {
-        return redirectToSignin(req);
-      }
+    if (payload && payload.role !== "admin") {
+      return NextResponse.redirect(new URL("/forbidden", req.url));
     }
+
+    return response;
   }
 
   if (pathname.startsWith("/signup")) {
@@ -99,7 +147,7 @@ export const config = {
     "/history/:path*",
     "/bookmarks/:path*",
     "/knowva/:path*",
-    "/knowva/:path*",
+    "/notifications/:path*",
     "/signup/:path*",
   ],
 };

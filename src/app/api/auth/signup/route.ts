@@ -1,11 +1,18 @@
 import bcrypt from "bcryptjs";
-import { SignJWT } from "jose";
 import { NextRequest, NextResponse } from "next/server";
 
 import { findOtpByEmail, deleteOtp } from "@/db/auth/otp";
 import { createUser } from "@/db/user";
 import { sendWelcomeEmail } from "@/services/email/send/welcome";
 import generateUsername from "@/utils/generateUsername";
+import {
+  createAccessToken,
+  createRefreshToken,
+  hashRefreshToken,
+} from "@/lib/auth/tokens";
+import { createAuthSession } from "@/db/auth/authSessions";
+import { setAuthCookies } from "@/lib/auth/cookies";
+import { getClientInfo } from "@/lib/auth/client-info";
 
 export async function POST(request: NextRequest) {
   try {
@@ -74,24 +81,29 @@ export async function POST(request: NextRequest) {
       referrer_code: referralCode ?? undefined,
     });
 
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const jwtToken = await new SignJWT({ user_id: user.id })
-      .setProtectedHeader({ alg: "HS256" })
-      .setIssuedAt()
-      .setExpirationTime("30d")
-      .sign(secret);
+    const refreshToken = createRefreshToken();
+    const refreshTokenHash = hashRefreshToken(refreshToken);
+
+    const { userAgent, ipAddress } = getClientInfo(request);
+
+    const sessionId = await createAuthSession({
+      userId: user.id,
+      refreshTokenHash,
+      userAgent,
+      ipAddress,
+    });
+
+    const accessToken = await createAccessToken({
+      userId: user.id,
+      sessionId,
+      role: user.role,
+    });
 
     const response = NextResponse.json({ user }, { status: 201 });
 
     response.cookies.delete("referral_code");
 
-    response.cookies.set("token", jwtToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 15,
-    });
+    setAuthCookies(response.cookies, accessToken, refreshToken);
 
     void sendWelcomeEmail({ email, name }).catch((error) => {
       console.error("Failed to send welcome email:", error);

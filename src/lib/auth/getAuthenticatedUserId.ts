@@ -1,15 +1,51 @@
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
-import { verifyJwt } from "@/lib/auth";
 
-export async function getAuthenticatedUserId(req?: NextRequest) {
-  const token = req
-    ? req.cookies.get("token")?.value
-    : (await cookies()).get("token")?.value;
+import { verifyAccessToken } from "./tokens";
+import { refreshAccessToken } from "./refreshAccessToken";
 
-  const { ok, reason, payload } = await verifyJwt(token);
+export async function getAuthenticatedUserId() {
+  const cookieStore = await cookies();
 
-  if (!ok) throw new Error(reason);
+  let accessToken = cookieStore.get("access_token")?.value;
+
+  let payload = await verifyAccessToken(accessToken);
+
+  if (!payload) {
+    const refreshToken = cookieStore.get("refresh_token")?.value;
+
+    if (!refreshToken) {
+      throw new Error("Unauthorized");
+    }
+
+    const refreshed = await refreshAccessToken(refreshToken, cookieStore);
+
+    if (!refreshed) {
+      throw new Error("Unauthorized");
+    }
+
+    accessToken = cookieStore.get("access_token")?.value;
+
+    payload = await verifyAccessToken(accessToken);
+
+    if (!payload) {
+      throw new Error("Unauthorized");
+    }
+  }
+
+  return payload.user_id;
+}
+
+export async function getUserId() {
+  const cookieStore = await cookies();
+
+  let accessToken = cookieStore.get("access_token")?.value;
+
+  let payload = await verifyAccessToken(accessToken);
+
+  if (!payload) {
+    console.log("error");
+    return null;
+  }
 
   return payload.user_id;
 }

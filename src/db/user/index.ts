@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { User } from "@/types/user";
+import { User, UserRole } from "@/types/user";
 
 export const USER_COLUMNS = {
   basic: "id, name, username",
@@ -82,6 +82,21 @@ export async function getUserPassword(userId: string): Promise<string | null> {
   if (error) throw error;
 
   return data.password_hash as string | null;
+}
+
+export async function getActiveUserRole(
+  userId: string,
+): Promise<UserRole | null> {
+  const { data, error } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", userId)
+    .eq("is_active", true)
+    .single();
+
+  if (error) throw error;
+
+  return data?.role ?? null;
 }
 
 export async function getPasswordHashByEmail(
