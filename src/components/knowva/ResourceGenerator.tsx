@@ -111,16 +111,26 @@ export default function ResourceGenerator() {
     setUnits((current) => {
       const id =
         current.length > 0 ? Math.max(...current.map((u) => u.id)) + 1 : 1;
+
+      const target =
+        details.type === "PYQs"
+          ? `Year ${new Date().getFullYear() - 5 + id}`
+          : `Unit ${id}`;
+
+      const exist = existingTargets.some(
+        (t) =>
+          slugify(t.target) ===
+          slugify(`${details.type === "PYQs" ? "Year" : "Unit"} ${id}`),
+      );
+
       return [
         ...current,
         {
           id,
-          target: `Unit ${id}`,
+          target,
           syllabus: "",
           status: "pending",
-          exist: existingTargets.some(
-            (t) => slugify(t.target) === slugify(`Unit ${id}`),
-          ),
+          exist,
         },
       ];
     });
@@ -171,7 +181,7 @@ export default function ResourceGenerator() {
       level,
       subject,
       paper,
-      target: type.startsWith("PYQs") ? "Solved" : "Unit",
+      target: type.startsWith("PYQs") ? "Year" : "Unit",
     });
 
     if (stopRequested.current) {
@@ -332,8 +342,12 @@ export default function ResourceGenerator() {
     if (buttonState !== "active") return;
 
     setUnits(
-      initialUnits.map((unit) => ({
+      initialUnits.map((unit, i) => ({
         ...unit,
+        target:
+          details.type === "PYQs"
+            ? `Year ${new Date().getFullYear() - 5 + i + 1}`
+            : `Unit ${i + 1}`,
         status: "pending",
         title: undefined,
         description: undefined,
@@ -356,7 +370,7 @@ export default function ResourceGenerator() {
       subject,
       paper,
       type,
-      target: type.startsWith("PYQs") ? "Solved " : "Unit ",
+      target: type.startsWith("PYQs") ? "Year " : "Unit ",
     });
 
     getNearByResources(path).then((items) => {
