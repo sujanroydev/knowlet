@@ -10,7 +10,11 @@ import { getResourceStyles } from "@/config/resourceThemes";
 import { useTheme } from "@/context/ThemeContext";
 import { useHeader } from "@/context/HeaderContext";
 import { useReader } from "@/context/ReaderContext";
-import { processResourceHtml, renderToc } from "@/utils/resource";
+import {
+  generateResourceTitle,
+  processResourceHtml,
+  renderToc,
+} from "@/utils/resource";
 import { titleCase } from "@/utils/string";
 
 export default function Content({ resource }: { resource: any }) {
@@ -44,7 +48,12 @@ export default function Content({ resource }: { resource: any }) {
       <div className="resource-content" style={style}>
         {resource.title && (
           <h1>
-            {titleCase(resource.target)}: {resource.title}
+            {resource.type === "pyqs"
+              ? generateResourceTitle(resource.path!)
+                  .split(" - ")
+                  .slice(0, -2)
+                  .join(" - ")
+              : `${titleCase(resource.target!)}: ${resource.title}`}
           </h1>
         )}
         {toc && (

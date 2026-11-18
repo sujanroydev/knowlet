@@ -13,13 +13,13 @@ import { getNearByResources } from "@/actions/resource";
 import { slugify, titleCase } from "@/utils/string";
 
 // const defaultTypes = ["Select", "Notes", "PYQs", "Questions", "PDF"];
-const defaultTypes = ["Select", "Notes", "Questions"];
+const defaultTypes = ["Select", "Notes", "PYQs", "Questions"];
 
 const defaultTargets = (type: string) =>
   type === "PYQs"
     ? Array(6)
         .fill(undefined)
-        .map((_, i) => `Solved ${i + 2021}`)
+        .map((_, i) => `Year ${i + 2021}`)
     : Array(15)
         .fill(undefined)
         .map((_, i) => `Unit ${i + 1}`);
@@ -67,7 +67,7 @@ export default function ResourceDetails({
       subject,
       paper,
       type,
-      target: type.startsWith("Notes") ? "Unit " : "Solved ",
+      target: type.startsWith("Notes") ? "Unit " : "Year ",
     });
 
     !disableTarget &&

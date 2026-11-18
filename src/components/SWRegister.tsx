@@ -41,9 +41,7 @@ export default function SWRegister() {
     setTimeout(async () => {
       const subscription = await getLocalSubscription().catch();
       if (subscription) return;
-      requestNotificationPermission().catch((error) => {
-        toast.error("Could not enable notifications");
-      });
+      requestNotificationPermission().catch(() => {});
     }, 15000);
   }, []);
 

@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { authFetch } from "@/lib/auth/authFetch";
+import { ActionState } from "@/types/main";
 
 const menuItems = [
   {
@@ -29,6 +30,7 @@ export default function ProfileMenu() {
   const { user, setUser } = useAuth();
 
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState<ActionState>("inactive");
 
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -50,13 +52,20 @@ export default function ProfileMenu() {
 
   async function handleSignout() {
     try {
+      setSigningOut("loading");
+
       const res = await authFetch("/api/auth/signout", {
         method: "POST",
       });
 
       const { success } = await res.json();
 
-      if (!success) throw new Error("Failed to Sign Out");
+      if (!success) {
+        setSigningOut("inactive");
+        throw new Error("Failed to Sign Out");
+      }
+
+      setSigningOut("active");
 
       localStorage.removeItem("knowlet-user");
       toast.success("Sign Out Successfull.");
@@ -66,6 +75,7 @@ export default function ProfileMenu() {
 
       router.push("/");
     } catch (error) {
+      setSigningOut("inactive");
       toast.error("Failed to Sign Out");
       return;
     }
@@ -138,7 +148,11 @@ export default function ProfileMenu() {
               onClick={handleSignout}
               className="w-full rounded-xl bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
             >
-              Sign Out
+              {signingOut === "inactive"
+                ? "Sign Out"
+                : signingOut === "loading"
+                  ? "Signing Out ...."
+                  : "Singed Out"}
             </button>
           </div>
         </div>

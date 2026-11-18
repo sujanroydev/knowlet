@@ -1,22 +1,31 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import ResourceDetails from "../dashboard/resources/resource-details";
-import { useResourceEditor } from "@/context/ResourceEditorContext";
 import { toast } from "sonner";
+
+import { useResourceEditor } from "@/context/ResourceEditorContext";
+import { useKnowva } from "@/context/KnowvaContext";
+
+import { NewResource } from "@/types/resource";
+import { ActionState } from "@/types/main";
+
+import {
+  generateResource,
+  generateQuestions,
+  generateAnswers,
+} from "@/actions/knowva/resource";
+
 import { buildResourcePath } from "@/utils/resource";
+import { slugify } from "@/utils/string";
 import {
   ensureResourceHierarchy,
   getNearByResources,
   insertResource,
   updateResource,
 } from "@/actions/resource";
-import { NewResource } from "@/types/resource";
-import { ActionState } from "@/types/main";
-import { generateResource, generateQuestions } from "@/actions/knowva/resource";
-import { slugify } from "@/utils/string";
+
 import { ModelSelector } from "./ModelSelector";
-import { useKnowva } from "@/context/KnowvaContext";
+import ResourceDetails from "../dashboard/resources/resource-details";
 
 type Status =
   | "pending"
@@ -102,16 +111,26 @@ export default function ResourceGenerator() {
     setUnits((current) => {
       const id =
         current.length > 0 ? Math.max(...current.map((u) => u.id)) + 1 : 1;
+
+      const target =
+        details.type === "PYQs"
+          ? `Year ${new Date().getFullYear() - id + 1}`
+          : `Unit ${id}`;
+
+      const exist = existingTargets.some(
+        (t) =>
+          slugify(t.target) ===
+          slugify(`${details.type === "PYQs" ? "Year" : "Unit"} ${id}`),
+      );
+
       return [
         ...current,
         {
           id,
-          target: `Unit ${id}`,
+          target,
           syllabus: "",
           status: "pending",
-          exist: existingTargets.some(
-            (t) => slugify(t.target) === slugify(`Unit ${id}`),
-          ),
+          exist,
         },
       ];
     });
@@ -162,7 +181,7 @@ export default function ResourceGenerator() {
       level,
       subject,
       paper,
-      target: type.startsWith("PYQs") ? "Solved" : "Unit",
+      target: type.startsWith("PYQs") ? "Year" : "Unit",
     });
 
     if (stopRequested.current) {
@@ -206,6 +225,11 @@ export default function ResourceGenerator() {
           generated = await generateQuestions(payload);
         } else if (type === "Notes") {
           generated = await generateResource(payload);
+        } else if (type === "PYQs") {
+          generated = await generateAnswers({
+            questions: unit.syllabus,
+            model,
+          });
         } else {
           toast.info("This type of generation is not supported");
         }
@@ -318,8 +342,12 @@ export default function ResourceGenerator() {
     if (buttonState !== "active") return;
 
     setUnits(
-      initialUnits.map((unit) => ({
+      initialUnits.map((unit, i) => ({
         ...unit,
+        target:
+          details.type === "PYQs"
+            ? `Year ${new Date().getFullYear() - i}`
+            : `Unit ${i + 1}`,
         status: "pending",
         title: undefined,
         description: undefined,
@@ -342,7 +370,7 @@ export default function ResourceGenerator() {
       subject,
       paper,
       type,
-      target: type.startsWith("PYQs") ? "Solved " : "Unit ",
+      target: type.startsWith("PYQs") ? "Year " : "Unit ",
     });
 
     getNearByResources(path).then((items) => {
@@ -366,6 +394,34 @@ export default function ResourceGenerator() {
   useEffect(() => {
     loadNearByResources();
   }, [details]);
+
+  useEffect(() => {
+    if (details.type === "PYQs") {
+      setUnits(
+        Array(5)
+          .fill(null)
+          .map((_, i) => ({
+            id: i + 1,
+            target: `Year ${new Date().getFullYear() - i}`,
+            syllabus: "",
+            status: "pending",
+            exist: false,
+          })),
+      );
+    } else {
+      setUnits(
+        Array(5)
+          .fill(null)
+          .map((_, i) => ({
+            id: i + 1,
+            target: `Unit ${i + 1}`,
+            syllabus: "",
+            status: "pending",
+            exist: false,
+          })),
+      );
+    }
+  }, [details.type]);
 
   return (
     <main className="min-h-screen bg-background">
@@ -437,6 +493,7 @@ export default function ResourceGenerator() {
               <UnitCard
                 key={unit.id}
                 unit={unit}
+                type={details.type!}
                 disabled={buttonState !== "active"}
                 exist={unit.exist}
                 onChange={(value) => updateUnit(unit.id, value)}
@@ -495,12 +552,14 @@ function Field({
 
 function UnitCard({
   unit,
+  type,
   disabled,
   exist,
   onChange,
   onRemove,
 }: {
   unit: Unit;
+  type: string;
   disabled: boolean;
   exist: boolean;
   onChange: (value: string) => void;
@@ -533,7 +592,7 @@ function UnitCard({
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         rows={3}
-        placeholder={`Enter syllabus for ${unit.target}...`}
+        placeholder={`Enter ${type === "PYQs" ? "questions" : "syllabus"} for ${unit.target}...`}
         className="w-full resize-y rounded-lg border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60"
       />
 

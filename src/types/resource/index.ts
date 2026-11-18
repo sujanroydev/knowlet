@@ -2,7 +2,7 @@ export type { Level } from "./level";
 export type { Subject } from "./subject";
 export type { Paper } from "./paper";
 
-export type ResourceType = "note" | "pyq" | "important_question" | "pdf";
+export type ResourceType = "notes" | "pyqs" | "questions" | "pdf";
 
 export type Mode =
   | "normal"
