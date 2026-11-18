@@ -4,6 +4,7 @@ import { ModelId } from "@/config/ai";
 import {
   generateResource as _generateResource,
   generateQuestions as _generateQuestions,
+  generateAnswers as _generateAnswers,
 } from "@/services/knowva/generation/resource";
 
 interface Props {
@@ -18,4 +19,12 @@ export async function generateResource(props: Props) {
 
 export async function generateQuestions(props: Props) {
   return _generateQuestions(props);
+}
+
+export async function generateAnswers(props: {
+  model?: ModelId;
+  questions: string;
+  stream?: boolean;
+}) {
+  return _generateAnswers(props);
 }

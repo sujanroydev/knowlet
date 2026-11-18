@@ -9,7 +9,11 @@ import { useKnowva } from "@/context/KnowvaContext";
 import { NewResource } from "@/types/resource";
 import { ActionState } from "@/types/main";
 
-import { generateResource, generateQuestions } from "@/actions/knowva/resource";
+import {
+  generateResource,
+  generateQuestions,
+  generateAnswers,
+} from "@/actions/knowva/resource";
 
 import { buildResourcePath } from "@/utils/resource";
 import { slugify } from "@/utils/string";
@@ -211,6 +215,11 @@ export default function ResourceGenerator() {
           generated = await generateQuestions(payload);
         } else if (type === "Notes") {
           generated = await generateResource(payload);
+        } else if (type === "PYQs") {
+          generated = await generateAnswers({
+            questions: unit.syllabus,
+            model,
+          });
         } else {
           toast.info("This type of generation is not supported");
         }
