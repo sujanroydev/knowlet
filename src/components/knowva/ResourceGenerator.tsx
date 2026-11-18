@@ -372,6 +372,34 @@ export default function ResourceGenerator() {
     loadNearByResources();
   }, [details]);
 
+  useEffect(() => {
+    if (details.type === "PYQs") {
+      setUnits(
+        Array(5)
+          .fill(null)
+          .map((_, i) => ({
+            id: i + 1,
+            target: `Year ${i + 2022}`,
+            syllabus: "",
+            status: "pending",
+            exist: false,
+          })),
+      );
+    } else {
+      setUnits(
+        Array(5)
+          .fill(null)
+          .map((_, i) => ({
+            id: i + 1,
+            target: `Unit ${i + 1}`,
+            syllabus: "",
+            status: "pending",
+            exist: false,
+          })),
+      );
+    }
+  }, [details.type]);
+
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-5xl px-4 py-8">
@@ -442,6 +470,7 @@ export default function ResourceGenerator() {
               <UnitCard
                 key={unit.id}
                 unit={unit}
+                type={details.type!}
                 disabled={buttonState !== "active"}
                 exist={unit.exist}
                 onChange={(value) => updateUnit(unit.id, value)}
@@ -500,12 +529,14 @@ function Field({
 
 function UnitCard({
   unit,
+  type,
   disabled,
   exist,
   onChange,
   onRemove,
 }: {
   unit: Unit;
+  type: string;
   disabled: boolean;
   exist: boolean;
   onChange: (value: string) => void;
@@ -538,7 +569,7 @@ function UnitCard({
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         rows={3}
-        placeholder={`Enter syllabus for ${unit.target}...`}
+        placeholder={`Enter ${type === "PYQs" ? "questions" : "syllabus"} for ${unit.target}...`}
         className="w-full resize-y rounded-lg border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60"
       />
 

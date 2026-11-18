@@ -13,7 +13,7 @@ import { getNearByResources } from "@/actions/resource";
 import { slugify, titleCase } from "@/utils/string";
 
 // const defaultTypes = ["Select", "Notes", "PYQs", "Questions", "PDF"];
-const defaultTypes = ["Select", "Notes", "Questions"];
+const defaultTypes = ["Select", "Notes", "PYQs", "Questions"];
 
 const defaultTargets = (type: string) =>
   type === "PYQs"
