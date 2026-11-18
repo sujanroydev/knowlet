@@ -114,7 +114,7 @@ export default function ResourceGenerator() {
 
       const target =
         details.type === "PYQs"
-          ? `Year ${new Date().getFullYear() - 5 + id}`
+          ? `Year ${new Date().getFullYear() - id + 1}`
           : `Unit ${id}`;
 
       const exist = existingTargets.some(
@@ -346,7 +346,7 @@ export default function ResourceGenerator() {
         ...unit,
         target:
           details.type === "PYQs"
-            ? `Year ${new Date().getFullYear() - 5 + i + 1}`
+            ? `Year ${new Date().getFullYear() - i}`
             : `Unit ${i + 1}`,
         status: "pending",
         title: undefined,
@@ -402,7 +402,7 @@ export default function ResourceGenerator() {
           .fill(null)
           .map((_, i) => ({
             id: i + 1,
-            target: `Year ${i + 2022}`,
+            target: `Year ${new Date().getFullYear() - i}`,
             syllabus: "",
             status: "pending",
             exist: false,
