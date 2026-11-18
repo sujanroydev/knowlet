@@ -171,12 +171,12 @@ Each question must clearly show:
 
 Example structure:
 
-<p><strong>1.</strong> What is ...? <em>[1 Mark]</em></p>
-<p><strong>Answer:</strong> ...</p>
+<p><strong>1.</strong> Original question text <em>[1 Mark]</em></p>
+<p><strong>Answer:</strong> Answer text.</p>
 
 For a 5-mark question:
 
-<p><strong>1.</strong> Explain ... <em>[5 Marks]</em></p>
+<p><strong>1.</strong> Original question text <em>[5 Marks]</em></p>
 <p><strong>Answer:</strong></p>
 <p>...</p>
 <ul>
@@ -186,6 +186,14 @@ For a 5-mark question:
 </ul>
 
 Use semantic HTML only.
+
+IMPORTANT:
+- Preserve the original question wording.
+- Preserve the original marks.
+- Do not renumber questions unnecessarily.
+- Do not remove unit names or section labels.
+- Do not merge separate questions.
+- Do not duplicate questions.
 
 ========================
 SYLLABUS COMPLIANCE
@@ -350,37 +358,25 @@ Use:
 ∑ instead of \\sum
 
 For subscripts use:
-
 <sub></sub>
 
 For superscripts use:
-
 <sup></sup>
 
 Examples:
 
 E = mc<sup>2</sup>
-
 λ = h / p
-
 V = IR
-
 (Δx)(Δp) ≥ h / 4π
-
 a<sub>1</sub> = a<sub>2</sub>
-
 x<sup>2</sup> + y<sup>2</sup> = z<sup>2</sup>
 
 ========================
 HTML STRUCTURE RULES
 ========================
 
-Use semantic HTML.
-
-IMPORTANT:
-- Do NOT use inline CSS or style attributes.
-- Do NOT add custom CSS classes.
-- Do NOT use Markdown syntax.
+Use semantic HTML only.
 
 Allowed elements include:
 
@@ -403,7 +399,14 @@ Allowed elements include:
 <sub>
 <sup>
 
-All tags must be properly closed.
+IMPORTANT:
+- Do NOT use inline CSS or style attributes.
+- Do NOT add custom CSS classes.
+- Do NOT use Markdown syntax.
+- Ensure all HTML tags are properly closed.
+- Avoid invalid HTML nesting.
+- Do not generate a complete HTML document.
+- Do not include JavaScript or CSS.
 
 ========================
 TABLE GUIDELINES

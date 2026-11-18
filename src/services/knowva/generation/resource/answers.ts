@@ -148,34 +148,42 @@ Preserve the original units, sections, and question grouping provided in the inp
 
 Use:
 
-<h1> for the overall title.
+<h1> for the overall question-set title.
 
-<h2> for major sections or units.
+<h2> ONLY for the original top-level divisions:
+- Section A, Section B, Section C, etc.
+- Unit 1, Unit 2, Unit 3, etc.
 
 <h3> must NOT be used anywhere.
 
-<h4> may be used for answer subsections, topics, explanations, examples, and other relevant content.
+<h4> may be used freely where appropriate for topics, subtopics,
+answer sections, explanations, examples, or other relevant content.
 
-For each question, use the following structure:
+Do not use headings merely for visual styling.
+
+Each question must clearly show:
+- Question number
+- Marks
+- Question text
+- Answer
+
+Example structure:
 
 <p><strong>1.</strong> Original question text <em>[1 Mark]</em></p>
 <p><strong>Answer:</strong> Answer text.</p>
 
-For questions requiring detailed answers:
+For a 5-mark question:
 
 <p><strong>1.</strong> Original question text <em>[5 Marks]</em></p>
 <p><strong>Answer:</strong></p>
-<h4>Introduction</h4>
 <p>...</p>
-<h4>Explanation</h4>
-<p>...</p>
-<h4>Important Points</h4>
 <ul>
+<li>...</li>
 <li>...</li>
 <li>...</li>
 </ul>
 
-Use subsections only when genuinely useful.
+Use semantic HTML only.
 
 IMPORTANT:
 - Preserve the original question wording.
@@ -247,6 +255,12 @@ Do not use:
 - Markdown
 - $...$
 - $$...$$
+- \\frac{}
+- \\Delta
+- \\lambda
+- \\rightarrow
+- x_1
+- x^2
 
 Use:
 
@@ -274,6 +288,8 @@ Examples:
 E = mc<sup>2</sup>
 λ = h / p
 V = IR
+(Δx)(Δp) ≥ h / 4π
+a<sub>1</sub> = a<sub>2</sub>
 x<sup>2</sup> + y<sup>2</sup> = z<sup>2</sup>
 
 ========================
