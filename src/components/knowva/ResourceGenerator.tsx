@@ -1,22 +1,27 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import ResourceDetails from "../dashboard/resources/resource-details";
-import { useResourceEditor } from "@/context/ResourceEditorContext";
 import { toast } from "sonner";
+
+import { useResourceEditor } from "@/context/ResourceEditorContext";
+import { useKnowva } from "@/context/KnowvaContext";
+
+import { NewResource } from "@/types/resource";
+import { ActionState } from "@/types/main";
+
+import { generateResource, generateQuestions } from "@/actions/knowva/resource";
+
 import { buildResourcePath } from "@/utils/resource";
+import { slugify } from "@/utils/string";
 import {
   ensureResourceHierarchy,
   getNearByResources,
   insertResource,
   updateResource,
 } from "@/actions/resource";
-import { NewResource } from "@/types/resource";
-import { ActionState } from "@/types/main";
-import { generateResource, generateQuestions } from "@/actions/knowva/resource";
-import { slugify } from "@/utils/string";
+
 import { ModelSelector } from "./ModelSelector";
-import { useKnowva } from "@/context/KnowvaContext";
+import ResourceDetails from "../dashboard/resources/resource-details";
 
 type Status =
   | "pending"

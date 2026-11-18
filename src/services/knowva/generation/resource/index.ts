@@ -9,3 +9,9 @@ export {
   buildCreateQuestionsPrompt,
   generateQuestions,
 } from "./question";
+
+export {
+  createAnswersSchema,
+  buildCreateAnswersPrompt,
+  generateAnswers,
+} from "./answers";
